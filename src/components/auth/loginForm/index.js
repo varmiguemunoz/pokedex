@@ -1,65 +1,59 @@
 import React from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  TextInput,
-  Button,
-  Keyboard,
-} from "react-native";
+import { Text, View, StyleSheet, TextInput, Button } from "react-native";
 
-import { useFormik } from "formik";
+import { Formik, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 export default function LoginForm() {
-  const formik = useFormik({
-    initialValues: initialValues(),
-    validationSchema: validationSchema(),
-    validateOnChange: false,
-    onSubmit: (formValue) => {
-      console.log(formValue);
-    },
+  const initialValues = {
+    email: "",
+    password: "",
+  };
+
+  const validationSchema = Yup.object().shape({
+    email: Yup.string()
+      .email("Escribe un email valido")
+      .required("El usuario es obligatorio"),
+    password: Yup.string().required("La contraseña es obligatoria"),
   });
 
   return (
-    <View>
-      <Text style={styles.title}>Iniciar Sesion</Text>
-      <TextInput
-        placeholder="Nombre de usuario"
-        style={styles.input}
-        autoCapitalize="none"
-        value={formik.values.userName}
-        onChangeText={(text) => formik.setFieldValue("userName", text)}
-      />
-      <TextInput
-        placeholder="Contraseña"
-        style={styles.input}
-        autoCapitalize="none"
-        secureTextEntry={true}
-        value={formik.values.password}
-        onChangeText={(text) => formik.setFieldValue("password", text)}
-      />
-      <Button title="Iniciar Sesion" onPress={formik.handleSubmit} />
+    <Formik
+      initialValues={initialValues}
+      onSubmit={(values) => console.log(values)}
+      validationSchema={validationSchema}
+    >
+      {({ handleChange, handleSubmit, values }) => {
+        return (
+          <View>
+            <Text style={styles.title}>Iniciar Sesion</Text>
+            <TextInput
+              placeholder="Nombre de usuario"
+              style={styles.input}
+              autoCapitalize="none"
+              value={values.email}
+              onChangeText={handleChange("email")}
+            />
+            <TextInput
+              placeholder="Contraseña"
+              style={styles.input}
+              autoCapitalize="none"
+              secureTextEntry={true}
+              value={values.password}
+              onChangeText={handleChange("password")}
+            />
 
-      <Text style={styles.error}>{formik.errors.userName}</Text>
-      <Text style={styles.error}>{formik.errors.password}</Text>
-    </View>
+            <ErrorMessage name="email">
+              {(msg) => <Text style={styles.error}>{msg}</Text>}
+            </ErrorMessage>
+
+            <Button title="Iniciar Sesion" onPress={handleSubmit} />
+          </View>
+        );
+      }}
+    </Formik>
   );
 }
-
-const initialValues = () => {
-  return {
-    userName: "",
-    password: "",
-  };
-};
-
-const validationSchema = () => {
-  return {
-    userName: Yup.string().required("El usuario es obligatorio"),
-    password: Yup.string().required("La contraseña es obligatoria"),
-  };
-};
 
 const styles = StyleSheet.create({
   title: {
